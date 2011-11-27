@@ -50,7 +50,13 @@
   (auto-complete '(ac-source-rst-roles ac-source-rst-options))
   )
 
+(defvar auto-complete-rst-other-sources nil
+  "Sources to use other than the sources defined in `auto-complete-rst'
+
+Default `ac-sources' will be used if it is `nil' (default).")
+
 (defun auto-complete-rst-add-sources ()
+  (setq ac-sources (or auto-complete-rst-other-sources ac-sources))
   (add-to-list 'ac-sources 'ac-source-rst-directives)
   (add-to-list 'ac-sources 'ac-source-rst-roles)
   (add-to-list 'ac-sources 'ac-source-rst-options)
