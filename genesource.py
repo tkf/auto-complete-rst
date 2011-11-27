@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from docutils import nodes
+from docutils.parsers.rst import directives
 import re
 import operator
 
@@ -65,7 +66,7 @@ def getdirtypes(nd):
         nd.parent.traverse(nodes.field_body)[0].astext())
 
 
-def directives(rstfile, ftype=None):
+def getdirectives(rstfile, ftype=None):
     field_lists = [
         x.parent.parent for x in
         getdoctree(rstfile, ftype).traverse(cond_field_name_is_directive_type)]
@@ -101,7 +102,7 @@ def role_aliases_from_text(text):
 RE_IN_COLONS = re.compile(r':(.+?):')
 
 
-def roles(rstfile, ftype=None):
+def getroles(rstfile, ftype=None):
     doctree = getdoctree(rstfile, ftype)
     roles_in_title = [
         x.astext().strip(":") for x in
@@ -113,6 +114,33 @@ def roles(rstfile, ftype=None):
     return roles_in_title + role_aliases
 
 
+def get_directives_sub_modules():
+    sub_module_names = list(set(
+        m for (d, (m, c)) in directives._directive_registry.iteritems()))
+    sub_modules = __import__(
+        directives.__name__, globals(), locals(), sub_module_names, -1)
+    return sub_modules
+
+
+def get_directive_specs():
+    sub_modules = get_directives_sub_modules()
+    directive_specs = []
+
+    for (dirname, (modname, clsname),
+         ) in directives._directive_registry.iteritems():
+        clsobj = getattr(getattr(sub_modules, modname), clsname)
+        directive_specs.append({
+            'directive': dirname,
+            'option': list(clsobj.option_spec if clsobj.option_spec else []),
+            })
+
+    return directive_specs
+
+
+def get_all_directive_options():
+    return sorted(set(concat(s['option'] for s in get_directive_specs())))
+
+
 def genelisp(docs_dir, directives_file, roles_file):
     import os
     import jinja2
@@ -120,8 +148,9 @@ def genelisp(docs_dir, directives_file, roles_file):
     env = jinja2.Environment()
     template = env.from_string(TEMP_SOURCE)
     print template.render(
-        directives=directives(os.path.join(docs_dir, directives_file)),
-        roles=roles(os.path.join(docs_dir, roles_file)),
+        directives=getdirectives(os.path.join(docs_dir, directives_file)),
+        roles=getroles(os.path.join(docs_dir, roles_file)),
+        options=get_all_directive_options(),
         )
 
 
@@ -131,6 +160,9 @@ TEMP_SOURCE = r"""
 
 (defun auto-complete-rst-roles-candidates ()
   '({% for item in roles %}"{{ item }}:" {% endfor %}))
+
+(defun auto-complete-rst-options-candidates ()
+  '({% for item in options %}"{{ item }}:" {% endfor %}))
 """
 
 

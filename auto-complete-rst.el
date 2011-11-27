@@ -30,6 +30,14 @@
     (action . auto-complete-rst-insert-two-backquotes)
     ))
 
+(defvar ac-source-rst-options
+  '((candidates . auto-complete-rst-options-candidates)
+    (prefix . "[[:space:]]\\{4,\\}:\\(.*\\)")
+    (symbol . "O")
+    (requires . 0)
+    (action . auto-complete-rst-insert-two-backquotes)
+    ))
+
 (defun auto-complete-rst-complete-space ()
   (interactive)
   (insert " ")
@@ -39,12 +47,13 @@
 (defun auto-complete-rst-complete-colon ()
   (interactive)
   (insert ":")
-  (auto-complete '(ac-source-rst-roles))
+  (auto-complete '(ac-source-rst-roles ac-source-rst-options))
   )
 
 (defun auto-complete-rst-add-sources ()
   (add-to-list 'ac-sources 'ac-source-rst-directives)
   (add-to-list 'ac-sources 'ac-source-rst-roles)
+  (add-to-list 'ac-sources 'ac-source-rst-options)
   (local-set-key ":" 'auto-complete-rst-complete-colon)
   (local-set-key " " 'auto-complete-rst-complete-space)
   )
