@@ -17,7 +17,7 @@
 
 (defvar ac-source-rst-directives
   '((candidates . auto-complete-rst-directives-candidates)
-    (prefix . "[[:space:]]\\.\\. \\(.*\\)")
+    (prefix . "[[:space:]]\\.\\. \\([[:alnum:]-]*\\)")
     (symbol . "D")
     (requires . 0)
     ))
