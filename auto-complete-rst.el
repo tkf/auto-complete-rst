@@ -24,7 +24,7 @@
 
 (defvar ac-source-rst-roles
   '((candidates . auto-complete-rst-roles-candidates)
-    (prefix . "[[:space:]]:\\(.*\\)")
+    (prefix . "[[:space:]]:\\([^:]*\\)")
     (symbol . "R")
     (requires . 0)
     (action . auto-complete-rst-insert-two-backquotes)
@@ -32,10 +32,9 @@
 
 (defvar ac-source-rst-options
   '((candidates . auto-complete-rst-options-candidates)
-    (prefix . "[[:space:]]\\{4,\\}:\\(.*\\)")
+    (prefix . "[[:space:]]\\{4,\\}:\\([^:]*\\)")
     (symbol . "O")
     (requires . 0)
-    (action . auto-complete-rst-insert-two-backquotes)
     ))
 
 (defun auto-complete-rst-complete-space ()
