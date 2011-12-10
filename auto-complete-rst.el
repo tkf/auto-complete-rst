@@ -10,6 +10,50 @@
     (eval-buffer))
   )
 
+
+(defun auto-complete-rst-directive-name-at-option (&optional bound)
+  "Get the directive name when the cursor is at the option"
+  (save-excursion
+    (let* ((dir-end-pos (auto-complete-rst-goto-directive-from-option bound))
+           (dir-name-end-pos (- (point) 2))
+           (dir-name-beg-pos-1
+            (re-search-backward " \\(\\sw\\|\\s_\\)*::\\=" bound t))
+           (dir-name-beg-pos
+            (if dir-name-beg-pos-1 (+ 1 dir-name-beg-pos-1))))
+      (when dir-name-beg-pos
+        (message "%s" dir-name-beg-pos)
+        (buffer-substring dir-name-beg-pos dir-name-end-pos)))))
+
+(defun auto-complete-rst-goto-directive-from-option (&optional bound)
+  "Go to the position right after the :: of directive (#) from option (@)
+
+.. DIRECTIVE::#
+   :OPTION:
+   :OPT@
+
+"
+  (setq bound (or bound (point-min)))
+  (let* ((opt-pos (re-search-backward ":\\(\\sw\\|\\s_\\)*\\=" bound t))
+         (opt-l0 (if opt-pos
+                     (re-search-backward "^\\(\\s \\)+\\=" bound t)))
+         (dir-pos nil))
+    (when opt-l0
+      (loop while (< bound (point))
+            do (progn (forward-line -1)
+                      (beginning-of-line))
+            ;; check if the current line has a directive starts with ".."
+            if (setq dir-pos
+                     (re-search-forward
+                      "\\=\\(\\s \\)*\\.\\.\\(\\s \\)+\\(\\sw\\|\\s_\\)+::"
+                      opt-pos t))
+            return dir-pos
+            ;; if not, then it must be an option line
+            if (not (re-search-forward "\\=\\(\\s \\)+:" opt-pos t))
+            ;; if not, then there is no directive
+            return nil))
+    dir-pos))
+
+
 (defun auto-complete-rst-insert-two-backquotes ()
   (insert "``")
   (backward-char)
