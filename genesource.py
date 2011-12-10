@@ -137,20 +137,24 @@ def get_directive_specs():
     return directive_specs
 
 
-def get_all_directive_options():
-    return sorted(set(concat(s['option'] for s in get_directive_specs())))
+def get_all_directive_options(directive_specs):
+    return sorted(set(concat(s['option'] for s in directive_specs)))
 
 
 def genelisp(docs_dir, directives_file, roles_file):
     import os
     import jinja2
 
+    directive_specs = get_directive_specs()
+    all_directive_options = get_all_directive_options(directive_specs)
+
     env = jinja2.Environment()
     template = env.from_string(TEMP_SOURCE)
     print template.render(
         directives=getdirectives(os.path.join(docs_dir, directives_file)),
         roles=getroles(os.path.join(docs_dir, roles_file)),
-        options=get_all_directive_options(),
+        options=all_directive_options,
+        directive_specs=directive_specs,
         )
 
 
@@ -161,8 +165,11 @@ TEMP_SOURCE = r"""
 (defun auto-complete-rst-roles-candidates ()
   '({% for item in roles %}"{{ item }}:" {% endfor %}))
 
-(defun auto-complete-rst-options-candidates ()
-  '({% for item in options %}"{{ item }}:" {% endfor %}))
+{% for specs in directive_specs -%}
+(puthash "{{ specs.directive }}"
+         '({% for item in specs.option %}"{{ item }}:" {% endfor %})
+         auto-complete-rst-directive-options-map)
+{% endfor %}
 """
 
 

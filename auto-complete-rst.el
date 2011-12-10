@@ -10,6 +10,18 @@
     (eval-buffer))
   )
 
+(defun auto-complete-rst-options-candidates ()
+  (auto-complete-rst-get-option
+   (auto-complete-rst-directive-name-at-option)))
+
+(defvar auto-complete-rst-directive-options-map
+  (make-hash-table :test 'equal)
+  "A map from directive name (string) to its options (list of string)")
+
+(defun auto-complete-rst-get-option (directive)
+  "Get options (list of string) of given directive"
+  (when directive
+    (gethash directive auto-complete-rst-directive-options-map)))
 
 (defun auto-complete-rst-directive-name-at-option (&optional bound)
   "Get the directive name when the cursor is at the option"
@@ -33,9 +45,10 @@
 
 "
   (setq bound (or bound (point-min)))
-  (let* ((opt-pos (re-search-backward ":\\(\\sw\\|\\s_\\)*\\=" bound t))
+  (let* ((opt-pos (re-search-backward
+                   "\\(\\s \\):?\\(\\sw\\|\\s_\\)*\\=" bound t))
          (opt-l0 (if opt-pos
-                     (re-search-backward "^\\(\\s \\)+\\=" bound t)))
+                     (re-search-backward "^\\(\\s \\)*\\=" bound t)))
          (dir-pos nil))
     (when opt-l0
       (loop while (< bound (point))
@@ -90,7 +103,7 @@
 (defun auto-complete-rst-complete-colon ()
   (interactive)
   (insert ":")
-  (auto-complete '(ac-source-rst-roles ac-source-rst-options))
+  (auto-complete '(ac-source-rst-options ac-source-rst-roles))
   )
 
 (defvar auto-complete-rst-other-sources nil
