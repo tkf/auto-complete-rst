@@ -41,8 +41,15 @@ def get_directive_specs():
 
 
 def get_roles():
+    role_registry = {}
+    role_registry.update(roles._roles)
+    role_registry.update(roles._role_registry)
+    role_registry.update(
+        (a, role_registry[r]) for (a, r) in en.roles.iteritems())
+
+    unimplemented = roles.unimplemented_role
     return sorted(
-        set(roles._roles) | set(roles._role_registry) | set(en.roles))
+        r for (r, f) in role_registry.iteritems() if f is not unimplemented)
 
 
 def genelisp():
