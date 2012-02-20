@@ -97,14 +97,14 @@
 (defun auto-complete-rst-complete-space ()
   (interactive)
   (insert " ")
-  (auto-complete '(ac-source-rst-directives))
-  )
+  (when auto-complete-mode
+    (auto-complete '(ac-source-rst-directives))))
 
 (defun auto-complete-rst-complete-colon ()
   (interactive)
   (insert ":")
-  (auto-complete '(ac-source-rst-options ac-source-rst-roles))
-  )
+  (when auto-complete-mode
+    (auto-complete '(ac-source-rst-options ac-source-rst-roles))))
 
 (defvar auto-complete-rst-other-sources nil
   "Sources to use other than the sources defined in `auto-complete-rst'
