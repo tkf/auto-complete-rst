@@ -150,23 +150,16 @@ def get_directive_specs():
     return directive_specs
 
 
-def get_all_directive_options(directive_specs):
-    return sorted(set(concat(s['option'] for s in directive_specs)))
-
-
 def genelisp(docs_dir, directives_file, roles_file):
     import os
     import jinja2
 
     directive_specs = get_directive_specs()
-    all_directive_options = get_all_directive_options(directive_specs)
-
     env = jinja2.Environment()
     template = env.from_string(TEMP_SOURCE)
     print template.render(
         directives=getdirectives(os.path.join(docs_dir, directives_file)),
         roles=getroles(os.path.join(docs_dir, roles_file)),
-        options=all_directive_options,
         directive_specs=directive_specs,
         )
 
