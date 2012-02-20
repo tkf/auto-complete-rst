@@ -5,6 +5,13 @@ from docutils.parsers.rst import directives
 import re
 import operator
 
+try:
+    # these imports register directives/roles defined in sphinx
+    import sphinx.directives
+    import sphinx.roles
+except:
+    pass
+
 
 def getcontent(rstfile, ftype):
     if ftype == 'gz' or (ftype is None and rstfile.endswith('.gz')):
@@ -126,13 +133,19 @@ def get_directive_specs():
     sub_modules = get_directives_sub_modules()
     directive_specs = []
 
-    for (dirname, (modname, clsname),
-         ) in directives._directive_registry.iteritems():
-        clsobj = getattr(getattr(sub_modules, modname), clsname)
+    def directive_specs_add(dirname, clsobj):
         directive_specs.append({
             'directive': dirname,
             'option': list(clsobj.option_spec if clsobj.option_spec else []),
             })
+
+    for (dirname, (modname, clsname),
+         ) in directives._directive_registry.iteritems():
+        clsobj = getattr(getattr(sub_modules, modname), clsname)
+        directive_specs_add(dirname, clsobj)
+
+    for (dirname, clsobj) in directives._directives.iteritems():
+        directive_specs_add(dirname, clsobj)
 
     return directive_specs
 
