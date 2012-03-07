@@ -12,6 +12,18 @@ except:
 
 
 def get_directives_sub_modules():
+    """
+    Do ``from docutils.parsers.rst.directives import body, images, ...``
+
+    This returns a top level object, so
+
+      getattr(get_directives_sub_modules(), "body")
+
+    returns the body module object.
+
+    See: http://docs.python.org/library/functions.html#__import__
+
+    """
     sub_module_names = list(set(
         m for (d, (m, c)) in directives._directive_registry.iteritems()))
     sub_modules = __import__(
