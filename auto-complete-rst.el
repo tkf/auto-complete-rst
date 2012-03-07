@@ -1,3 +1,6 @@
+(eval-when-compile
+  (require 'cl))
+
 (require 'auto-complete)
 
 (defvar auto-complete-rst-genesource-py
