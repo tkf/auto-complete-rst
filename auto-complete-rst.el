@@ -77,14 +77,14 @@
 
 (defvar ac-source-rst-directives
   '((candidates . auto-complete-rst-directives-candidates)
-    (prefix . "[[:space:]]\\.\\. \\([[:alnum:]-]*\\)")
+    (prefix . "[[:space:]]\\.\\. \\([[:alnum:]-:]*\\)")
     (symbol . "D")
     (requires . 0)
     ))
 
 (defvar ac-source-rst-roles
   '((candidates . auto-complete-rst-roles-candidates)
-    (prefix . "[[:space:]]:\\([^:]*\\)")
+    (prefix . "[[:space:]]:\\([[:alnum:]-:]*\\)")
     (symbol . "R")
     (requires . 0)
     (action . auto-complete-rst-insert-two-backquotes)
