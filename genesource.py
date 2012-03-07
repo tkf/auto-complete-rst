@@ -11,6 +11,45 @@ except:
     pass
 
 
+def get_sphinx_app(dummydir=None):
+    """Return Sphinx app object (to get some additional directives)."""
+    import os
+    from sphinx.application import Sphinx
+    if dummydir is None:
+        dummydir = os.path.join(os.path.dirname(__file__), "tmp")
+    srcdir = outdir = doctreedir = dummydir
+    confdir = None
+    buildername = "pickle"
+    app = Sphinx(
+        srcdir, confdir, outdir, doctreedir, buildername,
+        status=None, freshenv=True)
+    return app
+
+
+def get_sphinx_domain_directive_specs_and_roles():
+    """Get ``DOMAIN:NAME`` type directives and roles from Sphinx"""
+    from sphinx.domains import BUILTIN_DOMAINS
+    directive_specs = []
+    role_list = []
+
+    def directive_specs_add(dirname, clsobj):
+        directive_specs.append({
+            'directive': dirname,
+            'option': list(clsobj.option_spec if clsobj.option_spec else []),
+            })
+
+    for (domname, domain) in BUILTIN_DOMAINS.iteritems():
+        if domname == "std":
+            genename = lambda x: x
+        else:
+            genename = lambda x: ":".join([domname, x])
+        for (dirname, clsobj) in domain.directives.iteritems():
+            directive_specs_add(genename(dirname), clsobj)
+        role_list.extend(map(genename, domain.roles))
+
+    return (directive_specs, role_list)
+
+
 def get_directives_sub_modules():
     """
     Do ``from docutils.parsers.rst.directives import body, images, ...``
@@ -68,11 +107,16 @@ def genelisp():
     import jinja2
 
     directive_specs = get_directive_specs()
+    role_list = get_roles()
+
+    (sphinx_directive_specs, sphinx_role_list,
+    ) = get_sphinx_domain_directive_specs_and_roles()
+
     env = jinja2.Environment()
     template = env.from_string(TEMP_SOURCE)
     print template.render(
-        roles=get_roles(),
-        directive_specs=directive_specs,
+        roles=role_list + sphinx_role_list,
+        directive_specs=directive_specs + sphinx_directive_specs,
         )
 
 
@@ -97,6 +141,12 @@ def main():
     parser = ArgumentParser(
         description="Generate source from rst file")
     args = parser.parse_args()
+
+    try:
+        get_sphinx_app()
+    except:
+        pass
+
     genelisp(**vars(args))
 
 
