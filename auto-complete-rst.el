@@ -119,7 +119,7 @@
 
 (defvar ac-source-rst-roles
   '((candidates . auto-complete-rst-roles-candidates)
-    (prefix . "[[:space:]]:\\([[:alnum:]-:]*\\)")
+    (prefix . "[^[:alnum:]:]:\\([[:alnum:]-:]*\\)")
     (symbol . "R")
     (requires . 0)
     (action . auto-complete-rst-insert-two-backquotes)
