@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
-try:
-    # these imports register directives/roles defined in sphinx
-    import sphinx.directives
-    import sphinx.roles
-except:
-    pass
+
+def import_sphinx():
+    """Import sphinx so that some directives/roles are registered."""
+    try:
+        import sphinx.directives
+        import sphinx.roles
+        return sphinx
+    except:
+        pass
 
 
 def get_sphinx_app(dummydir=None):
@@ -143,6 +146,7 @@ def main():
         description="Generate source from rst file")
     args = parser.parse_args()
 
+    import_sphinx()
     try:
         get_sphinx_app()
     except:
