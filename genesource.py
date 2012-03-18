@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-from docutils.parsers.rst import directives, roles
-from docutils.parsers.rst.languages import en
-
 try:
     # these imports register directives/roles defined in sphinx
     import sphinx.directives
@@ -63,6 +60,7 @@ def get_directives_sub_modules():
     See: http://docs.python.org/library/functions.html#__import__
 
     """
+    from docutils.parsers.rst import directives
     sub_module_names = list(set(
         m for (d, (m, c)) in directives._directive_registry.iteritems()))
     sub_modules = __import__(
@@ -71,6 +69,7 @@ def get_directives_sub_modules():
 
 
 def get_directive_specs():
+    from docutils.parsers.rst import directives
     sub_modules = get_directives_sub_modules()
     directive_specs = []
 
@@ -92,6 +91,8 @@ def get_directive_specs():
 
 
 def get_roles():
+    from docutils.parsers.rst import roles
+    from docutils.parsers.rst.languages import en
     role_registry = {}
     role_registry.update(roles._roles)
     role_registry.update(roles._role_registry)
