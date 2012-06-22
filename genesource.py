@@ -147,11 +147,19 @@ class MockSphinx(object):
         return no_op
 
 
+def get_ext_setup_from_extension(extension):
+    if extension.endswith('.py'):
+        namespace = {}
+        execfile(extension, namespace)
+        return namespace['setup']
+    else:
+        ext = __import__(extension, fromlist=['setup'])
+        return ext.setup
+
+
 def get_domains_from_extension(extension):
-    namespace = {}
-    execfile(extension, namespace)
-    setup = namespace['setup']
     fakeapp = MockSphinx()
+    setup = get_ext_setup_from_extension(extension)
     setup(fakeapp)
     return fakeapp.domains
 
@@ -204,7 +212,7 @@ def main():
     parser = ArgumentParser(
         description="Generate source from rst file")
     parser.add_argument('extension', nargs='*', default=[],
-                        help='path to sphinx extensions.')
+                        help='file path or module path to sphinx extensions.')
     args = parser.parse_args()
 
     import_sphinx()
