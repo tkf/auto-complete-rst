@@ -139,7 +139,7 @@ class InfoGetterSphinx(InfoGetter):
         `extension` can be either file path or dotted module path.
         """
         fakeapp = MockSphinx()
-        setup = get_ext_setup_from_extension(extension)
+        setup = self.get_ext_setup_from_path(extension)
         setup(fakeapp)
 
         map(self.add_domain, fakeapp.domains)
@@ -148,6 +148,16 @@ class InfoGetterSphinx(InfoGetter):
             self._add_directive(*d)
 
         self.roles.extend(fakeapp.roles)
+
+    @staticmethod
+    def get_ext_setup_from_path(extension):
+        if extension.endswith('.py'):
+            namespace = {}
+            execfile(extension, namespace)
+            return namespace['setup']
+        else:
+            ext = __import__(extension, fromlist=['setup'])
+            return ext.setup
 
 
 class MockSphinx(object):
@@ -180,16 +190,6 @@ class MockSphinx(object):
         def no_op(*arg, **kwds):
             pass
         return no_op
-
-
-def get_ext_setup_from_extension(extension):
-    if extension.endswith('.py'):
-        namespace = {}
-        execfile(extension, namespace)
-        return namespace['setup']
-    else:
-        ext = __import__(extension, fromlist=['setup'])
-        return ext.setup
 
 
 def genelisp(extension=[]):
