@@ -38,15 +38,27 @@
 
 (require 'auto-complete)
 
+(defvar auto-complete-rst-sphinx-extensions nil
+  "Paths to Sphinx extensions.")
+
 (defvar auto-complete-rst-genesource-py
   (let ((current-directory (file-name-directory load-file-name)))
     (concat current-directory "genesource.py")))
 
+(defun auto-complete-rst-genesource-command ()
+  (mapconcat 'identity
+             (append (list "python -W ignore"
+                           auto-complete-rst-genesource-py)
+                     (mapcar 'expand-file-name
+                             auto-complete-rst-sphinx-extensions))
+             " "))
+
+;; Quick-check: (auto-complete-rst-genesource-command)
+
 (defun auto-complete-rst-genesource-eval ()
   (with-temp-buffer
     (erase-buffer)
-    (shell-command (concat "python -W ignore "
-                           auto-complete-rst-genesource-py) t)
+    (shell-command (auto-complete-rst-genesource-command) t)
     (condition-case err
         (eval-buffer)
       (error (warn "[auto-complete-rst] Failed to eval the source \

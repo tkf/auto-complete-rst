@@ -133,13 +133,46 @@ class InfoGetterSphinx(InfoGetter):
         return self
 
 
-def genelisp():
+class MockSphinx(object):
+
+    def __init__(self):
+        self.domains = []
+
+    def add_domain(self, domain):
+        self.domains.append(domain)
+
+    def __getattr__(self, name):
+        def no_op(*arg, **kwds):
+            pass
+        return no_op
+
+
+def get_domains_from_extension(extension):
+    namespace = {}
+    execfile(extension, namespace)
+    setup = namespace['setup']
+    fakeapp = MockSphinx()
+    setup(fakeapp)
+    return fakeapp.domains
+
+
+def get_domains_from_extension_list(extensions):
+    domains = []
+    for ext in extensions:
+        domains.extend(get_domains_from_extension(ext))
+    return domains
+
+
+def genelisp(extension=[]):
     import jinja2
 
     igdoc = InfoGetterDocutils()
     igdoc.getinfo()
 
+    extdomains = get_domains_from_extension_list(extension)
+
     igsphinx = InfoGetterSphinx.with_buildins()
+    map(igsphinx.add_domain, extdomains)
     igsphinx.getinfo()
 
     env = jinja2.Environment()
@@ -170,6 +203,8 @@ def main():
 
     parser = ArgumentParser(
         description="Generate source from rst file")
+    parser.add_argument('extension', nargs='*', default=[],
+                        help='path to sphinx extensions.')
     args = parser.parse_args()
 
     import_sphinx()
