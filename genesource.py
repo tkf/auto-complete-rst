@@ -26,28 +26,54 @@ def get_sphinx_app(dummydir=None):
     return app
 
 
-def get_sphinx_domain_directive_specs_and_roles():
-    """Get ``DOMAIN:NAME`` type directives and roles from Sphinx"""
-    from sphinx.domains import BUILTIN_DOMAINS
-    directive_specs = []
-    role_list = []
+class InfoGetter(object):
 
-    def directive_specs_add(dirname, clsobj):
-        directive_specs.append({
+    def __init__(self):
+        self.directives = []
+        self.roles = []
+
+    def _add_directive(self, dirname, clsobj):
+        self.directives.append({
             'directive': dirname,
             'option': list(clsobj.option_spec if clsobj.option_spec else []),
             })
 
-    for (domname, domain) in BUILTIN_DOMAINS.iteritems():
+    def getinfo(self):
+        """ Set the value of `self.directives` and `self.roles`."""
+        raise NotImplementedError
+
+
+class InfoGetterSphinx(InfoGetter):
+
+    def __init__(self):
+        super(InfoGetterSphinx, self).__init__()
+        self.domains = []
+
+    def add_domain(self, domain):
+        self.domains.append(domain)
+
+    def _getinfo_domain(self, domain):
+        """Get directive and role information from `domain`."""
+        domname = domain.name
         if domname == "std":
             genename = lambda x: x
         else:
             genename = lambda x: ":".join([domname, x])
         for (dirname, clsobj) in domain.directives.iteritems():
-            directive_specs_add(genename(dirname), clsobj)
-        role_list.extend(map(genename, domain.roles))
+            self._add_directive(genename(dirname), clsobj)
+        self.roles.extend(map(genename, domain.roles))
 
-    return (directive_specs, role_list)
+    def getinfo(self):
+        map(self._getinfo_domain, self.domains)
+
+
+def get_sphinx_domain_directive_specs_and_roles():
+    """Get ``DOMAIN:NAME`` type directives and roles from Sphinx"""
+    from sphinx.domains import BUILTIN_DOMAINS
+    ig = InfoGetterSphinx()
+    map(ig.add_domain, BUILTIN_DOMAINS.itervalues())
+    ig.getinfo()
+    return (ig.directives, ig.roles)
 
 
 def get_directives_sub_modules():
