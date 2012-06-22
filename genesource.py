@@ -43,40 +43,6 @@ class InfoGetter(object):
         raise NotImplementedError
 
 
-class InfoGetterSphinx(InfoGetter):
-
-    """Get ``DOMAIN:NAME`` type directives and roles from Sphinx"""
-
-    def __init__(self):
-        super(InfoGetterSphinx, self).__init__()
-        self.domains = []
-
-    def add_domain(self, domain):
-        self.domains.append(domain)
-
-    def _getinfo_domain(self, domain):
-        """Get directive and role information from `domain`."""
-        domname = domain.name
-        if domname == "std":
-            genename = lambda x: x
-        else:
-            genename = lambda x: ":".join([domname, x])
-        for (dirname, clsobj) in domain.directives.iteritems():
-            self._add_directive(genename(dirname), clsobj)
-        self.roles.extend(map(genename, domain.roles))
-
-    def getinfo(self):
-        map(self._getinfo_domain, self.domains)
-
-    @classmethod
-    def with_buildins(cls):
-        """Make an instance and load built-in domains."""
-        from sphinx.domains import BUILTIN_DOMAINS
-        self = cls()
-        map(self.add_domain, BUILTIN_DOMAINS.itervalues())
-        return self
-
-
 class InfoGetterDocutils(InfoGetter):
 
     @staticmethod
@@ -131,6 +97,40 @@ class InfoGetterDocutils(InfoGetter):
     def getinfo(self):
         self._getinfo_directives()
         self._getinfo_roles()
+
+
+class InfoGetterSphinx(InfoGetter):
+
+    """Get ``DOMAIN:NAME`` type directives and roles from Sphinx"""
+
+    def __init__(self):
+        super(InfoGetterSphinx, self).__init__()
+        self.domains = []
+
+    def add_domain(self, domain):
+        self.domains.append(domain)
+
+    def _getinfo_domain(self, domain):
+        """Get directive and role information from `domain`."""
+        domname = domain.name
+        if domname == "std":
+            genename = lambda x: x
+        else:
+            genename = lambda x: ":".join([domname, x])
+        for (dirname, clsobj) in domain.directives.iteritems():
+            self._add_directive(genename(dirname), clsobj)
+        self.roles.extend(map(genename, domain.roles))
+
+    def getinfo(self):
+        map(self._getinfo_domain, self.domains)
+
+    @classmethod
+    def with_buildins(cls):
+        """Make an instance and load built-in domains."""
+        from sphinx.domains import BUILTIN_DOMAINS
+        self = cls()
+        map(self.add_domain, BUILTIN_DOMAINS.itervalues())
+        return self
 
 
 def genelisp():
