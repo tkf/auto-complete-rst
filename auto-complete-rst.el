@@ -44,6 +44,7 @@
 
 (defun auto-complete-rst-genesource-eval ()
   (with-temp-buffer
+    (erase-buffer)
     (shell-command (concat "python -W ignore "
                            auto-complete-rst-genesource-py) t)
     (condition-case err
