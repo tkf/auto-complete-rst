@@ -45,6 +45,8 @@ class InfoGetter(object):
 
 class InfoGetterSphinx(InfoGetter):
 
+    """Get ``DOMAIN:NAME`` type directives and roles from Sphinx"""
+
     def __init__(self):
         super(InfoGetterSphinx, self).__init__()
         self.domains = []
@@ -66,14 +68,13 @@ class InfoGetterSphinx(InfoGetter):
     def getinfo(self):
         map(self._getinfo_domain, self.domains)
 
-
-def get_sphinx_domain_directive_specs_and_roles():
-    """Get ``DOMAIN:NAME`` type directives and roles from Sphinx"""
-    from sphinx.domains import BUILTIN_DOMAINS
-    ig = InfoGetterSphinx()
-    map(ig.add_domain, BUILTIN_DOMAINS.itervalues())
-    ig.getinfo()
-    return (ig.directives, ig.roles)
+    @classmethod
+    def with_buildins(cls):
+        """Make an instance and load built-in domains."""
+        from sphinx.domains import BUILTIN_DOMAINS
+        self = cls()
+        map(self.add_domain, BUILTIN_DOMAINS.itervalues())
+        return self
 
 
 class InfoGetterDocutils(InfoGetter):
@@ -100,6 +101,7 @@ class InfoGetterDocutils(InfoGetter):
         return sub_modules
 
     def _getinfo_directives(self):
+        """Gather directive info in docutils into `self.directives`."""
         from docutils.parsers.rst import directives
         sub_modules = self.get_directives_sub_modules()
 
@@ -112,6 +114,7 @@ class InfoGetterDocutils(InfoGetter):
             self._add_directive(dirname, clsobj)
 
     def _getinfo_roles(self):
+        """Gather role info in docutils into `self.roles`."""
         from docutils.parsers.rst import roles
         from docutils.parsers.rst.languages import en
         role_registry = {}
@@ -136,14 +139,14 @@ def genelisp():
     igdoc = InfoGetterDocutils()
     igdoc.getinfo()
 
-    (sphinx_directive_specs, sphinx_role_list,
-    ) = get_sphinx_domain_directive_specs_and_roles()
+    igsphinx = InfoGetterSphinx.with_buildins()
+    igsphinx.getinfo()
 
     env = jinja2.Environment()
     template = env.from_string(TEMP_SOURCE)
     print template.render(
-        roles=igdoc.roles + sphinx_role_list,
-        directive_specs=igdoc.directives + sphinx_directive_specs,
+        roles=igdoc.roles + igsphinx.roles,
+        directive_specs=igdoc.directives + igsphinx.directives,
         )
 
 
