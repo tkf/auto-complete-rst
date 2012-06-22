@@ -167,7 +167,8 @@ Useful, for example, to add new extension(s) after modifying
   (interactive)
   (insert ":")
   (when auto-complete-mode
-    (auto-complete '(ac-source-rst-options ac-source-rst-roles))))
+    (auto-complete
+     '(ac-source-rst-directives ac-source-rst-options ac-source-rst-roles))))
 
 (defvar auto-complete-rst-other-sources nil
   "Sources to use other than the sources defined in `auto-complete-rst'
