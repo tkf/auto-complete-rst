@@ -132,14 +132,49 @@ class InfoGetterSphinx(InfoGetter):
         map(self.add_domain, BUILTIN_DOMAINS.itervalues())
         return self
 
+    def add_extension(self, extension):
+        """
+        Add Sphinx extension in the path `extension`.
+
+        `extension` can be either file path or dotted module path.
+        """
+        fakeapp = MockSphinx()
+        setup = get_ext_setup_from_extension(extension)
+        setup(fakeapp)
+
+        map(self.add_domain, fakeapp.domains)
+
+        for d in fakeapp.directives:
+            self._add_directive(*d)
+
+        self.roles.extend(fakeapp.roles)
+
 
 class MockSphinx(object):
 
+    """
+    Generate fake Sphinx application instance.
+
+    See: http://sphinx.pocoo.org/ext/appapi.html
+    """
+
     def __init__(self):
+        self.directives = []
+        self.roles = []
         self.domains = []
 
     def add_domain(self, domain):
         self.domains.append(domain)
+
+    def add_directive(self, *args, **kwds):
+        if len(args) == 2 and not kwds:
+            self.directives.append(args)
+        else:
+            import warnings
+            warnings.warn("docutils 0.4 style is not supported")
+
+    def add_role(self, name, role):
+        self.roles.append(name)
 
     def __getattr__(self, name):
         def no_op(*arg, **kwds):
@@ -157,30 +192,14 @@ def get_ext_setup_from_extension(extension):
         return ext.setup
 
 
-def get_domains_from_extension(extension):
-    fakeapp = MockSphinx()
-    setup = get_ext_setup_from_extension(extension)
-    setup(fakeapp)
-    return fakeapp.domains
-
-
-def get_domains_from_extension_list(extensions):
-    domains = []
-    for ext in extensions:
-        domains.extend(get_domains_from_extension(ext))
-    return domains
-
-
 def genelisp(extension=[]):
     import jinja2
 
     igdoc = InfoGetterDocutils()
     igdoc.getinfo()
 
-    extdomains = get_domains_from_extension_list(extension)
-
     igsphinx = InfoGetterSphinx.with_buildins()
-    map(igsphinx.add_domain, extdomains)
+    map(igsphinx.add_extension, extension)
     igsphinx.getinfo()
 
     env = jinja2.Environment()
