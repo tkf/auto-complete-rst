@@ -186,6 +186,11 @@ class MockSphinx(object):
     def add_role(self, name, role):
         self.roles.append(name)
 
+    def add_autodocumenter(self, cls):
+        from sphinx.ext import autodoc
+        autodoc.add_documenter(cls)
+        self.add_directive('auto' + cls.objtype, autodoc.AutoDirective)
+
     def __getattr__(self, name):
         def no_op(*arg, **kwds):
             pass
