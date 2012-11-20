@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+
 
 def import_sphinx():
     """Import sphinx so that some directives/roles are registered."""
@@ -13,7 +15,6 @@ def import_sphinx():
 
 def get_sphinx_app(dummydir=None):
     """Return Sphinx app object (to get some additional directives)."""
-    import os
     from sphinx.application import Sphinx
     if dummydir is None:
         dummydir = os.path.join(os.path.dirname(__file__), "tmp")
@@ -152,6 +153,7 @@ class InfoGetterSphinx(InfoGetter):
     @staticmethod
     def get_ext_setup_from_path(extension):
         if extension.endswith('.py'):
+            extension = os.path.expanduser(extension)
             namespace = {}
             execfile(extension, namespace)
             return namespace['setup']

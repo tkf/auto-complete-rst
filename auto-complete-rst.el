@@ -49,8 +49,7 @@
   (mapconcat 'identity
              (append (list "python -W ignore"
                            auto-complete-rst-genesource-py)
-                     (mapcar 'expand-file-name
-                             auto-complete-rst-sphinx-extensions))
+                     auto-complete-rst-sphinx-extensions)
              " "))
 
 ;; Quick-check: (auto-complete-rst-genesource-command)
