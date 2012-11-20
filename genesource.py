@@ -189,9 +189,16 @@ class MockSphinx(object):
         self.roles.append(name)
 
     def add_autodocumenter(self, cls):
-        from sphinx.ext import autodoc
-        autodoc.add_documenter(cls)
-        self.add_directive('auto' + cls.objtype, autodoc.AutoDirective)
+        """
+        Register autodocumenter as directive.
+
+        The real `Sphinx.add_autodocumenter` adds `autodoc.AutoDirective`
+        as the directive and `AutoDirective` uses the actual directive
+        when it is called.  However, doing so hides `option_spec`.
+        Therefore, I am registering the documenter class directly here.
+
+        """
+        self.add_directive('auto' + cls.objtype, cls)
 
     def __getattr__(self, name):
         def no_op(*arg, **kwds):
