@@ -5,6 +5,8 @@
 ;; Author: ARAKAKI, Takafumi
 ;; Maintainer: ARAKAKI, Takafumi
 ;; Created: Sun Nov 27 17:48:44 2011 +0100
+;; Package-Requires: ((auto-complete "1.4"))
+;; Version: 0.1.0
 ;; URL: https://github.com/tkf/auto-complete-rst
 ;;
 ;; This file is NOT part of GNU Emacs.
